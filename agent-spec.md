@@ -4,7 +4,6 @@ Team:Clustora
 Department: B.Tech RPT & IT
 Submitted: 15 September 2026
 
----
 
 ## 1. The setting
 
@@ -32,13 +31,22 @@ Never, however much a user wants it: It does not track actual study time, send r
 
 A complete walkthrough
 **Student**: Arjun, second-year engineering student
+
 **Exam**: Thermodynamics
+
 **Days remaining**: 4
+
 **Available study time**: 3 hours per day
+
 **Input**
+
 Arjun starts a new StudySync session and enters:
+
 "I have my Thermodynamics exam in 4 days. I can study for 3 hours each day. I need to cover First Law, Second Law, Entropy, Thermodynamic Cycles, and Refrigeration. I find Entropy difficult and want more time for it."
-The agent converts this into a structured plan request:
+
+The agent converts this into a structured plan request: 
+
+
 '''json
 {
   "student": "Arjun",
@@ -49,8 +57,10 @@ The agent converts this into a structured plan request:
   "priority_topic": "Entropy"
 }
 '''
+
 **Step 1** — Draft
 The planning step uses the available hours, number of days, topic list, and Arjun's stated difficulty with Entropy. Because Entropy is flagged as the priority topic, the draft allocates it extra time relative to the other topics — a full day alone, plus a 30-minute buffer pulled from Refrigeration's allocation on Day 4
+
 '''json
 {
   "kind": "study_plan",
@@ -65,12 +75,15 @@ The planning step uses the available hours, number of days, topic list, and Arju
   ]
 }
 '''
+
 **Step 2** — Check and ask
+
 The agent does not treat its first plan as final. It presents the plan and asks for approval:
 "This plan gives Entropy a full day plus a short revision slot on Day 4, since you flagged it as difficult. Do you approve it, or would you like to change any day or time allocation?"
 Arjun does not approve it:
 "I have only 1.5 hours on Day 2 because of another commitment. Also, I don't want to study First Law and Second Law on the same day."
 The agent records the rejection and the constraints that caused it:
+
 '''json
 {
   "kind": "plan_feedback",
@@ -82,14 +95,22 @@ The agent records the rejection and the constraints that caused it:
   ]
 }
 '''
+
 The run moves backwards from review to revision instead of starting a new conversation.
+
 **Step 3** — Revise
+
 The revision step reads the previous plan and Arjun's feedback rather than generating an independent timetable. It must preserve:
 No day exceeds Arjun's available hours.
+
 First Law and Second Law are on different days.
+
 Entropy keeps its priority weighting.
+
 All five topics still receive study time.
+
 The final day retains revision time.
+
 '''json
 {
   "kind": "study_plan",
@@ -104,11 +125,17 @@ The final day retains revision time.
   ]
 }
 '''
+
 The agent asks again:
+
 "The revised plan separates First Law and Second Law, limits Day 2 to 1.5 hours, and still gives Entropy extra time on Day 4 since it's your priority topic. Do you approve this plan?"
+
 Arjun raises one more objection:
+
 "Close — but move that extra Entropy slot to Day 3 instead, since Day 4 is already my heaviest day."
+
 The agent reads this as a targeted edit, not a rejection of the whole plan, and moves the 0.5-hour Entropy block accordingly without touching anything else:
+
 '''json
 {
   "kind": "plan_feedback",
@@ -117,6 +144,7 @@ The agent reads this as a targeted edit, not a rejection of the whole plan, and 
   "constraints": ["Move Entropy extra-revision slot from Day 4 to Day 3"]
 }
 '''
+
 '''json
 {
   "kind": "study_plan",
@@ -131,7 +159,9 @@ The agent reads this as a targeted edit, not a rejection of the whole plan, and 
   ]
 }
 '''
+
 "Yes, I approve this plan."
+
 '''json
 {
   "kind": "approval",
@@ -141,11 +171,17 @@ The agent reads this as a targeted edit, not a rejection of the whole plan, and 
   "status": "active"
 }
 '''
+
 **Step 4** — Second encounter
+
 The following day, Arjun returns to StudySync. Instead of asking him to re-enter the exam, topics, and plan, the system loads the saved state and opens with it:
+
 "Welcome back. Your Thermodynamics plan has First Law completed on Day 1 and Entropy scheduled for today, Day 2 — 1.5 hours, since you flagged it as your hardest topic. How did it go?"
+
 Arjun reports:
-"I completed First Law yesterday, but I could only study Entropy for 30 minutes today. I still haven't started Second Law."»
+
+"I completed First Law yesterday, but I could only study Entropy for 30 minutes today. I still haven't started Second Law."
+
 '''json
 {
   "kind": "progress",
@@ -156,8 +192,11 @@ Arjun reports:
   "not_started": ["Second Law", "Thermodynamic Cycles", "Refrigeration"]
 }
 '''
+
 **Step 5** — Adapt the remaining plan
+
 The agent compares the saved approved plan (attempt 3) against the new progress record. It does not reschedule First Law, and it does not generate a new four-day plan — it changes only what's unfinished:
+
 '''json
 {
   "kind": "plan_update",
@@ -177,10 +216,13 @@ The agent compares the saved approved plan (attempt 3) against the new progress 
   ]
 }
 '''
+
 The agent presents the update:
+
 "Your Entropy session was only partially done, so I carried the remaining hour into Day 3 along with the extra revision slot you asked to move there. First Law is off the plan since it's complete. Does this work?"
 Arjun can approve it or send it back again, using the same revision path as Steps 2 and 3.
 The important difference from a fresh conversation is that StudySync knows what Arjun originally planned, what he negotiated, what he approved, what he completed, and what remains — and it treats "Entropy is hard" as a standing constraint that keeps shaping the plan across both encounters, not a note that was read once and forgotten.
+
 
 ## 5. Who is doing the thinking
 
@@ -199,8 +241,7 @@ What happens if nobody answers, and how the output shows that:
 The plan remains in a waiting-for-approval state and is not marked as approved. The stored record shows "waiting — student response required" rather than silently treating the plan as accepted. When the student returns, the system presents the saved draft and resumes from the waiting state. If no response is ever given, the output remains explicitly marked "not approved — waiting for student response."
 
 ## 6. The state machine
- ## 6. The state machine
-
+ 
 ### How StudySync works
 
 ```text
@@ -271,6 +312,7 @@ where it stopped
 
 ### States
 
+
 | State | Type | What happens here | What moves it forward |
 |---|---|---|---|
 | `student_input` | Active | Student gives the exam, topics, available time, difficult topics and other preferences. | Student submits the details. |
@@ -292,7 +334,6 @@ where it stopped
 | Student gives new constraints | `student_review → revising → planning` |
 | Student returns with different progress from the original plan | `progress_check → planning` |
 | Student has not answered a question | The run stays in `waiting` until the student returns |
- The important part is that StudySync does not throw away the previous work when going backwards. It uses the previous plan together with the student's new feedback or progress.
 
 What the run decides
 StudySync decides whether the current plan needs to be changed based on the student's feedback and progress. If the information is not enough, it waits for the student instead of guessing.
@@ -321,7 +362,6 @@ But you still retain the **agentic parts** the organisers are specifically looki
 
 
 ## 8. Step-by-step contracts
-
 
 
 ## 9. The second encounter
@@ -357,8 +397,6 @@ The next day, Arjun comes back to finish his plan. Here's the difference memory 
 
 ## 12. Build order
 
-## 12. Build order
-
 | Phase | What lands | Hours |
 |---|---|---:|
 | 1 | Build the complete flow with fixed sample responses: student input → understanding → study plan → student review → revision → approval. | 4 |
@@ -384,8 +422,6 @@ We will build the complete flow with fixed responses first and save useful model
 ## 14. How this grows
 
 
-
-## 15. What you are least sure about
 
 ## 15. What you are least sure about
 
