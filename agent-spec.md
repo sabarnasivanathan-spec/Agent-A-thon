@@ -1,8 +1,11 @@
 # AgentSpec — StudySync AI
 
 Team:Clustora
+
 Department: B.Tech RPT & IT
+
 Submitted: 15 September 2026
+
 
 
 ## 1. The setting
