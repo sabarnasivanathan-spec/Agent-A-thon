@@ -233,7 +233,7 @@ The important difference from a fresh conversation is that StudySync knows what 
 | step | the agent does it | the human does it | what the human loses if the agent does it |
 |---|---|---|---|
 | Understand the student's topics, available hours and constraints | Extracts and structures the information provided by the student | Provides the actual exam topics, available time and personal constraints | The plan could be based on assumptions instead of the student's real situation |
-| Create the first study plan | Allocates topics across the available days while following the stated constraints | | Nothing essential; this is a repeatable planning task |
+| Create the first study plan | Allocates topics across the available days while following the stated constraints | Reviews the proposed plan and identifies whether any allocation conflicts with their preferences or priorities | Nothing essential; this is a repeatable planning task |
 | Review the plan against the student's situation | Checks the plan against the stated constraints and presents it for review | Decides whether the plan actually fits their schedule and states what needs to change | Control over their own schedule, priorities and preferences |
 | Revise the plan after feedback | Reallocates the remaining topics while preserving the student's stated constraints | Specifies what should change when the plan does not fit | The ability to decide what should be prioritised, avoided or changed |
 | Approve the plan | Records the decision and saves the approved plan | Explicitly approves or rejects the revised plan | Final control over what they actually intend to follow |
