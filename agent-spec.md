@@ -47,7 +47,7 @@ Arjun starts a new StudySync session and enters:
 The agent converts this into a structured plan request: 
 
 
-'''json
+```json
 {
   "student": "Arjun",
   "exam": "Thermodynamics",
@@ -56,12 +56,12 @@ The agent converts this into a structured plan request:
   "topics": ["First Law", "Second Law", "Entropy", "Thermodynamic Cycles", "Refrigeration"],
   "priority_topic": "Entropy"
 }
-'''
+```
 
 **Step 1** — Draft
 The planning step uses the available hours, number of days, topic list, and Arjun's stated difficulty with Entropy. Because Entropy is flagged as the priority topic, the draft allocates it extra time relative to the other topics — a full day alone, plus a 30-minute buffer pulled from Refrigeration's allocation on Day 4
 
-'''json
+```json
 {
   "kind": "study_plan",
   "attempt": 1,
@@ -74,7 +74,7 @@ The planning step uses the available hours, number of days, topic list, and Arju
     { "day": 4, "hours": 3, "topics": ["Refrigeration (2.5h)", "Entropy — extra revision (0.5h)"] }
   ]
 }
-'''
+```
 
 **Step 2** — Check and ask
 
@@ -84,7 +84,7 @@ Arjun does not approve it:
 "I have only 1.5 hours on Day 2 because of another commitment. Also, I don't want to study First Law and Second Law on the same day."
 The agent records the rejection and the constraints that caused it:
 
-'''json
+```json
 {
   "kind": "plan_feedback",
   "attempt": 1,
@@ -94,7 +94,7 @@ The agent records the rejection and the constraints that caused it:
     "First Law and Second Law cannot be scheduled on the same day"
   ]
 }
-'''
+```
 
 The run moves backwards from review to revision instead of starting a new conversation.
 
@@ -111,7 +111,7 @@ All five topics still receive study time.
 
 The final day retains revision time.
 
-'''json
+```json
 {
   "kind": "study_plan",
   "attempt": 2,
@@ -124,7 +124,7 @@ The final day retains revision time.
     { "day": 4, "hours": 3, "topics": ["Refrigeration (2.5h)", "Entropy — extra revision (0.5h)"] }
   ]
 }
-'''
+```
 
 The agent asks again:
 
@@ -136,16 +136,16 @@ Arjun raises one more objection:
 
 The agent reads this as a targeted edit, not a rejection of the whole plan, and moves the 0.5-hour Entropy block accordingly without touching anything else:
 
-'''json
+```json
 {
   "kind": "plan_feedback",
   "attempt": 2,
   "approved": false,
   "constraints": ["Move Entropy extra-revision slot from Day 4 to Day 3"]
 }
-'''
+```
 
-'''json
+```json
 {
   "kind": "study_plan",
   "attempt": 3,
@@ -158,11 +158,11 @@ The agent reads this as a targeted edit, not a rejection of the whole plan, and 
     { "day": 4, "hours": 3, "topics": ["Refrigeration", "Revision"] }
   ]
 }
-'''
+```
 
 "Yes, I approve this plan."
 
-'''json
+```json
 {
   "kind": "approval",
   "student": "Arjun",
@@ -170,7 +170,7 @@ The agent reads this as a targeted edit, not a rejection of the whole plan, and 
   "approved_at": "2026-09-15T09:20:00",
   "status": "active"
 }
-'''
+```
 
 **Step 4** — Second encounter
 
@@ -182,7 +182,7 @@ Arjun reports:
 
 "I completed First Law yesterday, but I could only study Entropy for 30 minutes today. I still haven't started Second Law."
 
-'''json
+```json
 {
   "kind": "progress",
   "student": "Arjun",
@@ -191,13 +191,13 @@ Arjun reports:
   "partially_completed": [{ "topic": "Entropy", "completed_hours": 0.5 }],
   "not_started": ["Second Law", "Thermodynamic Cycles", "Refrigeration"]
 }
-'''
+```
 
 **Step 5** — Adapt the remaining plan
 
 The agent compares the saved approved plan (attempt 3) against the new progress record. It does not reschedule First Law, and it does not generate a new four-day plan — it changes only what's unfinished:
 
-'''json
+```json
 {
   "kind": "plan_update",
   "student": "Arjun",
@@ -215,7 +215,8 @@ The agent compares the saved approved plan (attempt 3) against the new progress 
     { "day": 4, "hours": 3, "topics": ["Thermodynamic Cycles", "Refrigeration", "Final Revision"] }
   ]
 }
-'''
+```
+
 
 The agent presents the update:
 
@@ -309,31 +310,32 @@ Student returns
         v
 System continues from
 where it stopped
+```
 
 ### States
 
 
-| State | Type | What happens here | What moves it forward |
-|---|---|---|---|
-| `student_input` | Active | Student gives the exam, topics, available time, difficult topics and other preferences. | Student submits the details. |
-| `understanding` | Active | StudySync organises what the student has said so it can plan around the real situation. | The information needed for planning is clear. |
-| `planning` | Active | StudySync creates a study plan based on the student's information. | A plan is ready to show the student. |
-| `student_review` | Waiting | The student looks at the plan and decides whether it works. | Student approves it or asks for changes. |
-| `revising` | Active | StudySync changes the plan using the student's feedback instead of starting again from zero. | A revised plan is ready. |
-| `active_plan` | Active | The approved plan is saved and becomes the student's current plan. | Student returns later or completes the plan. |
-| `progress_check` | Waiting | When the student returns, StudySync asks what was actually completed and what is still pending. | Student reports their progress. |
-| `waiting` | Waiting | StudySync has asked the student something but has not received an answer yet. | Student returns and answers. |
-| `completed` | Finished | All planned topics are completed. | Nothing. This is the end of the plan. |
-| `stopped` | Finished | The system reaches its revision or usage limit before reaching an approved plan. | Nothing. This is the end of the run. |
+| State            | Type     | What happens here                                                                               | What moves it forward                         |
+| ---------------- | -------- | ----------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| `student_input`  | Active   | Student gives the exam, topics, available time, difficult topics and other preferences.         | Student submits the details.                  |
+| `understanding`  | Active   | StudySync organises what the student has said so it can plan around the real situation.         | The information needed for planning is clear. |
+| `planning`       | Active   | StudySync creates a study plan based on the student's information.                              | A plan is ready to show the student.          |
+| `student_review` | Waiting  | The student looks at the plan and decides whether it works.                                     | Student approves it or asks for changes.      |
+| `revising`       | Active   | StudySync changes the plan using the student's feedback instead of starting again from zero.    | A revised plan is ready.                      |
+| `active_plan`    | Active   | The approved plan is saved and becomes the student's current plan.                              | Student returns later or completes the plan.  |
+| `progress_check` | Waiting  | When the student returns, StudySync asks what was actually completed and what is still pending. | Student reports their progress.               |
+| `waiting`        | Waiting  | StudySync has asked the student something but has not received an answer yet.                   | Student returns and answers.                  |
+| `completed`      | Finished | All planned topics are completed.                                                               | Nothing. This is the end of the plan.         |
+| `stopped`        | Finished | The system reaches its revision or usage limit before reaching an approved plan.                | Nothing. This is the end of the run.          |
 
 ### What can send the work backwards
 
-| Situation | What happens |
-|---|---|
-| Student does not like the plan | `student_review → revising → planning` |
-| Student gives new constraints | `student_review → revising → planning` |
-| Student returns with different progress from the original plan | `progress_check → planning` |
-| Student has not answered a question | The run stays in `waiting` until the student returns |
+| Situation                                                      | What happens                                         |
+| -------------------------------------------------------------- | ---------------------------------------------------- |
+| Student does not like the plan                                 | `student_review → revising → planning`               |
+| Student gives new constraints                                  | `student_review → revising → planning`               |
+| Student returns with different progress from the original plan | `progress_check → planning`                          |
+| Student has not answered a question                            | The run stays in `waiting` until the student returns |
 
 What the run decides
 StudySync decides whether the current plan needs to be changed based on the student's feedback and progress. If the information is not enough, it waits for the student instead of guessing.
@@ -397,16 +399,16 @@ The next day, Arjun comes back to finish his plan. Here's the difference memory 
 
 ## 12. Build order
 
-| Phase | What lands | Hours |
-|---|---|---:|
-| 1 | Build the complete flow with fixed sample responses: student input → understanding → study plan → student review → revision → approval. | 4 |
-| | **Cut line:** We can demonstrate the complete planning and revision flow, including the student approval step, even without live AI. | |
-| 2 | Add real AI responses for understanding, planning and revision. Store the approved plan so it can be loaded later. | 6 |
-| | **Cut line:** A real student input can produce a personalised plan, receive feedback, revise it and save the approved plan. | |
-| 3 | Add the second encounter: load the saved plan, collect the student's actual progress, and adjust only the remaining study plan. | 5 |
-| | **Cut line:** We can demonstrate that StudySync remembers the previous plan and changes it based on what the student actually completed. | |
-| 4 | Add waiting/resume behaviour, revision and model-call limits, error handling, and clean up the demo interface. | 3 |
-| | **Cut line:** The complete agent can pause for the student, resume later, and safely stop when its limits are reached. | |
+| Phase | What lands                                                                                                                               | Hours |
+| ----- | ---------------------------------------------------------------------------------------------------------------------------------------- | ----: |
+| 1     | Build the complete flow with fixed sample responses: student input → understanding → study plan → student review → revision → approval.  |     4 |
+|       | **Cut line:** We can demonstrate the complete planning and revision flow, including the student approval step, even without live AI.     |       |
+| 2     | Add real AI responses for understanding, planning and revision. Store the approved plan so it can be loaded later.                       |     6 |
+|       | **Cut line:** A real student input can produce a personalised plan, receive feedback, revise it and save the approved plan.              |       |
+| 3     | Add the second encounter: load the saved plan, collect the student's actual progress, and adjust only the remaining study plan.          |     5 |
+|       | **Cut line:** We can demonstrate that StudySync remembers the previous plan and changes it based on what the student actually completed. |       |
+| 4     | Add waiting/resume behaviour, revision and model-call limits, error handling, and clean up the demo interface.                           |     3 |
+|       | **Cut line:** The complete agent can pause for the student, resume later, and safely stop when its limits are reached.                   |       |
 
 ### Where the hours will actually go
 
